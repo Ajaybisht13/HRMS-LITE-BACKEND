@@ -1,7 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "postgresql://hrms_lite_6gb8_user:XMdNEgaorJAKpKPJoyXKqVSAHdQobzWS@dpg-d6ord9ma2pns73b0lo90-a.oregon-postgres.render.com/hrms_lite_6gb8"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 
