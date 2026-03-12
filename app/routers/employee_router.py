@@ -49,6 +49,14 @@ def get_employees(db: Session = Depends(get_db)):
 
     employees = db.query(Employee).all()
 
+    if not employees:
+        return {
+        "status": 200,
+        "succeeded": True,
+        "message": "No employees found",
+        "data": []
+    }
+
     return {
         "status": 200,
         "succeeded": True,
