@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -34,19 +34,23 @@ def mark_attendance(data: AttendanceCreate, db: Session = Depends(get_db)):
         }
 
     existing = db.query(Attendance).filter(
-        Attendance.employee_id == data.employee_id,
-        Attendance.date == data.date,
+        Attendance.employee_id == employee.id,
+        Attendance.date == data.date
     ).first()
 
     if existing:
         return {
             "status": 400,
             "succeeded": False,
-            "message": "Attendance already marked for this employee on this date",
+            "message": "Attendance already marked for this date",
             "data": None
         }
 
-    record = Attendance(**data.model_dump())
+    record = Attendance(
+        employee_id=employee.id,
+        date=data.date,
+        status=data.status
+    )
 
     db.add(record)
     db.commit()
@@ -63,17 +67,21 @@ def mark_attendance(data: AttendanceCreate, db: Session = Depends(get_db)):
 @router.post("/get_attendance")
 def get_attendance(data: AttendanceRequest, db: Session = Depends(get_db)):
 
-    records = db.query(Attendance).filter(
-        Attendance.employee_id == data.employee_id
-    ).order_by(desc(Attendance.date)).all()
+    employee = db.query(Employee).filter(
+        Employee.employee_id == data.employee_id
+    ).first()
 
-    if not records:
+    if not employee:
         return {
-            "status": 200,
-            "succeeded": True,
-            "message": "No attendance records found",
+            "status": 404,
+            "succeeded": False,
+            "message": "Employee not found",
             "data": []
         }
+
+    records = db.query(Attendance).filter(
+        Attendance.employee_id == employee.id
+    ).order_by(desc(Attendance.date)).all()
 
     return {
         "status": 200,

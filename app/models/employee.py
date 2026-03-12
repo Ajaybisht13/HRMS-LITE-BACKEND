@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from app.database.database import Base
 
 class Employee(Base):
@@ -14,3 +15,9 @@ class Employee(Base):
     email = Column(String, unique=True)
 
     department = Column(String)
+
+    attendance = relationship(
+        "Attendance",
+        cascade="all, delete",
+        passive_deletes=True
+    )
